@@ -1,24 +1,45 @@
-"""
-A simple example of an animated plot
-"""
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+#!/usr/bin/env python3
+from threading import Lock
+from flask import Flask, render_template, session, request
+from flask_socketio import SocketIO, emit, join_room, leave_room, \
+    close_room, rooms, disconnect
+import random
 
-fig, ax = plt.subplots()
 
-x = np.arange(0, 2*np.pi, 0.01)        # x-array
-line, = ax.plot(x, np.sin(x))
+async_mode = None
 
-def animate(i):
-    line.set_ydata(np.sin(x+i/10.0))  # update the data
-    return line,
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, async_mode=async_mode)
+thread = None
+thread_lock = Lock()
 
-#Init only required for blitting to give a clean slate.
-def init():
-    line.set_ydata(np.ma.array(x, mask=True))
-    return line,
+# То что крутиться на заднем фоне
+def background_thread():
+    """Example of how to send server generated events to clients."""
+    count = 0
+    while True:
+        # Спит 0.1 секунду
+        socketio.sleep(0.5)
+        count += 1
+        socketio.emit('my_response',
+                      {'data': str(random.randint(0,90)), 'count': count},
+                      namespace='/test')
 
-ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), init_func=init,
-    interval=25, blit=True)
-plt.show()
+
+@socketio.on('connect', namespace='/test')
+def test_connect():
+    global thread
+    with thread_lock:
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+
+
+@app.route('/')
+def index():
+    return render_template('dash.html', async_mode=socketio.async_mode)
+
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
