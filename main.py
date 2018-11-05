@@ -18,7 +18,6 @@ averages = []
 
 def controlPet():
     data = []
-
     s = serial.Serial("/dev/tty.usbmodem14101", 115200)
     print(s)
     global percent, averages
