@@ -31,7 +31,7 @@ thread_lock = Lock()
 
 def background_thread():
     data = []
-    s = serial.Serial("/dev/tty.usbmodem14201", 115200)
+    s = serial.Serial("/dev/tty.usbmodem14101", 115200)
     print(s)
     global percent, averages
     print("Calibrating")
@@ -77,25 +77,25 @@ def background_thread():
                 if percent < 0:
                     percent = random.random()*15
                     print(percent)
-                if percent > 40:
+                if percent > 20:
                     print("GO!")
                     averages.append(average)
                     socketio.emit('my_response',
                                   {'data': str(int(percent)), 'count': 'Go!'},
                                   namespace='/test')
-                    # urllib.request.urlopen("http://192.168.4.1/0")
+                    urllib.request.urlopen("http://192.168.4.1/0")
                 else:
                     print("STOP")
                     socketio.emit('my_response',
                                   {'data': str(int(percent)), 'count': 'Concentrate'},
                                   namespace='/test')
-                    # urllib.request.urlopen("http://192.168.4.1/1")
+                    urllib.request.urlopen("http://192.168.4.1/1")
             except:
                 average = value / float(len(data))
-                averages.append(average)
+                # averages.append(average)
                 pass
         except:
-            s = serial.Serial("/dev/tty.usbmodem14201", 115200)
+            s = serial.Serial("/dev/tty.usbmodem14101", 115200)
 
 
 # То что крутиться на заднем фоне
@@ -122,6 +122,7 @@ def index():
 
 @app.route('/go/')
 def index2():
+    urllib.request.urlopen("http://192.168.4.1/1")
     with thread_lock:
         if thread:
             socketio.stop()
