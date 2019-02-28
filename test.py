@@ -14,7 +14,7 @@ import time
 from tqdm import tqdm
 import random
 
-
+port = port
 percent = 0
 starting = int(time.time())
 averages = []
@@ -31,7 +31,7 @@ thread_lock = Lock()
 
 def background_thread():
     data = []
-    s = serial.Serial("/dev/tty.usbmodem14101", 115200)
+    s = serial.Serial(port, 115200)
     print(s)
     global percent, averages
     print("Calibrating")
@@ -95,7 +95,7 @@ def background_thread():
                 # averages.append(average)
                 pass
         except:
-            s = serial.Serial("/dev/tty.usbmodem14101", 115200)
+            s = serial.Serial(port, 115200)
 
 
 # То что крутиться на заднем фоне

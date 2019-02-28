@@ -6,10 +6,9 @@ void setup() {
 }
 
 void loop() {
-  
+
   if(Serial.available()){
   int val = analogRead(A0);
   Serial.println(val);
 }
-
 }
